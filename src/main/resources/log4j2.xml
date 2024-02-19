@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Don't forget to set system property
+-DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+     to make all loggers asynchronous. -->
+<Configuration status="DEBUG" monitorInterval="300">
+    <Properties>
+        <Property name="node.id">dummy-node</Property>
+    </Properties>
+    <Appenders>
+        <!-- Async Loggers will auto-flush in batches, so switch off immediateFlush. -->
+        <RollingRandomAccessFile name="API_FILE_LOG" fileName="logs/${sys:node.id}.log"
+                                 filePattern="logs/${sys:node.id}-%d{yyyyMMdd-HHmm}-%i.log.gz"
+                                 immediateFlush="false" append="true" >
+            <PatternLayout>
+                <Pattern>%d %p{ERROR=ERROR, length=2} %c{1.} [%t] %m %ex%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy interval="40" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="150"/>
+        </RollingRandomAccessFile>
+        <RollingRandomAccessFile name="API_ACCESS_LOG" fileName="logs/${sys:node.id}-access.log"
+                                 filePattern="logs/${sys:node.id}-access-%d{yyyyMMdd-HH}.log"
+                                 immediateFlush="false" append="true" >
+            <PatternLayout>
+                <Pattern>%d %m %n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingRandomAccessFile>
+        <!--Console name="Console" target="SYSTEM_OUT"><PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] [%X{requestId}] %p{ERROR=ERROR, length=2} %c{1.} %m %ex%n"/></Console-->
+    </Appenders>
+    <Loggers>
+        <logger name="com.wibmo" level="TRACE" additivity="false">
+            <AppenderRef ref="API_FILE_LOG"/>
+            <!--<AppenderRef ref="Console"/>-->
+        </logger>
+    </Loggers>
+</Configuration>
